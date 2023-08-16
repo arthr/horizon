@@ -31,6 +31,8 @@ export default {
                     yy: '%d years ago',
                 },
             });
+            
+            moment().tz('America/Sao_Paulo').format();
 
             let secondsElapsed = moment().diff(time, 'seconds');
             let dayStart = moment('2018-01-01')
