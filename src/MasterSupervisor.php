@@ -2,7 +2,7 @@
 
 namespace Laravel\Horizon;
 
-use Cake\Chronos\Chronos;
+use Carbon\CarbonImmutable;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Cache\Factory as CacheFactory;
@@ -15,12 +15,18 @@ use Laravel\Horizon\Contracts\Restartable;
 use Laravel\Horizon\Contracts\SupervisorRepository;
 use Laravel\Horizon\Contracts\Terminable;
 use Laravel\Horizon\Events\MasterSupervisorLooped;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
 
 class MasterSupervisor implements Pausable, Restartable, Terminable
 {
     use ListensForSignals;
+
+    /**
+     * The environment that was used to provision this master supervisor.
+     *
+     * @var string|null
+     */
+    public $environment;
 
     /**
      * The name of the master supervisor.
@@ -60,10 +66,13 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
     /**
      * Create a new master supervisor instance.
      *
+     * @param  string  $environment
      * @return void
      */
-    public function __construct()
+    public function __construct(string $environment = null)
     {
+        $this->environment = $environment;
+
         $this->name = static::name();
         $this->supervisors = collect();
 
@@ -173,13 +182,13 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
         app(MasterSupervisorRepository::class)
                     ->forget($this->name);
 
-        $startedTerminating = Chronos::now();
+        $startedTerminating = CarbonImmutable::now();
 
         // Here we will wait until all of the child supervisors finish terminating and
         // then exit the process. We will keep track of a timeout value so that the
         // process does not get stuck in an infinite loop here waiting for these.
         while (count($this->supervisors->filter->isRunning())) {
-            if (Chronos::now()->subSeconds($longest)
+            if (CarbonImmutable::now()->subSeconds($longest)
                         ->gte($startedTerminating)) {
                 break;
             }
@@ -218,6 +227,7 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
      * Ensure that this is the only master supervisor running for this machine.
      *
      * @return void
+     *
      * @throws \Exception
      */
     public function ensureNoOtherMasterSupervisors()
@@ -246,10 +256,8 @@ class MasterSupervisor implements Pausable, Restartable, Terminable
             $this->persist();
 
             event(new MasterSupervisorLooped($this));
-        } catch (Exception $e) {
-            app(ExceptionHandler::class)->report($e);
         } catch (Throwable $e) {
-            app(ExceptionHandler::class)->report(new FatalThrowableError($e));
+            app(ExceptionHandler::class)->report($e);
         }
     }
 

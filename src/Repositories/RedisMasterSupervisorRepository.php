@@ -2,7 +2,7 @@
 
 namespace Laravel\Horizon\Repositories;
 
-use Cake\Chronos\Chronos;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Redis\Factory as RedisFactory;
 use Illuminate\Support\Arr;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
@@ -37,7 +37,7 @@ class RedisMasterSupervisorRepository implements MasterSupervisorRepository
     public function names()
     {
         return $this->connection()->zrevrangebyscore('masters', '+inf',
-            Chronos::now()->subSeconds(14)->getTimestamp()
+            CarbonImmutable::now()->subSeconds(14)->getTimestamp()
         );
     }
 
@@ -72,7 +72,7 @@ class RedisMasterSupervisorRepository implements MasterSupervisorRepository
     {
         $records = $this->connection()->pipeline(function ($pipe) use ($names) {
             foreach ($names as $name) {
-                $pipe->hmget('master:'.$name, ['name', 'pid', 'status', 'supervisors']);
+                $pipe->hmget('master:'.$name, ['name', 'pid', 'status', 'supervisors', 'environment']);
             }
         });
 
@@ -81,6 +81,7 @@ class RedisMasterSupervisorRepository implements MasterSupervisorRepository
 
             return ! $record[0] ? null : (object) [
                 'name' => $record[0],
+                'environment' => $record[4],
                 'pid' => $record[1],
                 'status' => $record[2],
                 'supervisors' => json_decode($record[3], true),
@@ -102,6 +103,7 @@ class RedisMasterSupervisorRepository implements MasterSupervisorRepository
             $pipe->hmset(
                 'master:'.$master->name, [
                     'name' => $master->name,
+                    'environment' => $master->environment,
                     'pid' => $master->pid(),
                     'status' => $master->working ? 'running' : 'paused',
                     'supervisors' => json_encode($supervisors),
@@ -109,7 +111,7 @@ class RedisMasterSupervisorRepository implements MasterSupervisorRepository
             );
 
             $pipe->zadd('masters',
-                Chronos::now()->getTimestamp(), $master->name
+                CarbonImmutable::now()->getTimestamp(), $master->name
             );
 
             $pipe->expire('master:'.$master->name, 15);
@@ -145,7 +147,7 @@ class RedisMasterSupervisorRepository implements MasterSupervisorRepository
     public function flushExpired()
     {
         $this->connection()->zremrangebyscore('masters', '-inf',
-            Chronos::now()->subSeconds(14)->getTimestamp()
+            CarbonImmutable::now()->subSeconds(14)->getTimestamp()
         );
     }
 

@@ -29,7 +29,7 @@
             loadQueues() {
                 this.ready = false;
 
-                this.$http.get('/' + Horizon.path + '/api/metrics/queues')
+                this.$http.get(Horizon.basePath + '/api/metrics/queues')
                     .then(response => {
                         this.queues = response.data;
 
@@ -55,7 +55,7 @@
             <span>There aren't any queues.</span>
         </div>
 
-        <table v-if="ready && queues.length > 0" class="table table-hover table-sm mb-0">
+        <table v-if="ready && queues.length > 0" class="table table-hover mb-0">
             <thead>
             <tr>
                 <th>Queue</th>

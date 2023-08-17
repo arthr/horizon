@@ -4,6 +4,8 @@ namespace Laravel\Horizon;
 
 use Closure;
 use Exception;
+use Illuminate\Support\Facades\File;
+use RuntimeException;
 
 class Horizon
 {
@@ -44,6 +46,8 @@ class Horizon
 
     /**
      * Indicates if Horizon should use the dark theme.
+     *
+     * @deprecated
      *
      * @var bool
      */
@@ -90,7 +94,8 @@ class Horizon
      *
      * @param  string  $connection
      * @return void
-     * @throws Exception
+     *
+     * @throws \Exception
      */
     public static function use($connection)
     {
@@ -100,13 +105,15 @@ class Horizon
             throw new Exception("Redis connection [{$connection}] has not been configured.");
         }
 
-        config(['database.redis.horizon' => array_merge($config, [
-            'options' => ['prefix' => config('horizon.prefix') ?: 'horizon:'],
-        ])]);
+        $config['options']['prefix'] = config('horizon.prefix') ?: 'horizon:';
+
+        config(['database.redis.horizon' => $config]);
     }
 
     /**
      * Specifies that Horizon should use the dark theme.
+     *
+     * @deprecated
      *
      * @return static
      */
@@ -168,5 +175,23 @@ class Horizon
         static::$smsNumber = $number;
 
         return new static;
+    }
+
+    /**
+     * Determine if Horizon's published assets are up-to-date.
+     *
+     * @return bool
+     *
+     * @throws \RuntimeException
+     */
+    public static function assetsAreCurrent()
+    {
+        $publishedPath = public_path('vendor/horizon/mix-manifest.json');
+
+        if (! File::exists($publishedPath)) {
+            throw new RuntimeException('Horizon assets are not published. Please run: php artisan horizon:publish');
+        }
+
+        return File::get($publishedPath) === File::get(__DIR__.'/../public/mix-manifest.json');
     }
 }

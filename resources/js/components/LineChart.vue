@@ -17,6 +17,9 @@
             this.chart = new Chart(this.context, {
                 type: 'line',
                 options: {
+                    tooltips: {
+                        intersect: false,
+                    },
                     legend: {
                         display: false,
                     },
@@ -24,13 +27,18 @@
                         yAxes: [
                             {
                                 ticks: {
-                                    beginAtZero: true
+                                    beginAtZero: true,
+                                     callback: (value, index, values) => {
+                                        return this.data.datasets[0].label === "Seconds"
+                                            ? `${value} secs`
+                                            : value;
+                                    },
                                 },
                                 gridLines: {
                                     display: true
                                 },
                                 beforeBuildTicks: function (scale) {
-                                    var max = _.max(scale.chart.data.datasets[0].data);
+                                    var max = scale.chart.data.datasets[0].data.reduce((max, value) => value > max ? value : max)
 
                                     scale.max = parseFloat(max) + parseFloat(max * 0.25);
                                 },
@@ -62,6 +70,6 @@
 
 <template>
     <div style="position: relative;">
-        <canvas ref="canvas" height="70"></canvas>
+        <canvas ref="canvas" height="120"></canvas>
     </div>
 </template>

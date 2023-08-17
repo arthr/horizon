@@ -45,23 +45,68 @@ interface JobRepository
     public function getFailed($afterIndex = null);
 
     /**
+     * Get a chunk of pending jobs.
+     *
+     * @param  string  $afterIndex
+     * @return \Illuminate\Support\Collection
+     */
+    public function getPending($afterIndex = null);
+
+    /**
+     * Get a chunk of completed jobs.
+     *
+     * @param  string  $afterIndex
+     * @return \Illuminate\Support\Collection
+     */
+    public function getCompleted($afterIndex = null);
+
+    /**
+     * Get a chunk of silenced jobs.
+     *
+     * @param  string  $afterIndex
+     * @return \Illuminate\Support\Collection
+     */
+    public function getSilenced($afterIndex = null);
+
+    /**
      * Get the count of recent jobs.
      *
-     * @return \Illuminate\Support\Collection
+     * @return int
      */
     public function countRecent();
 
     /**
      * Get the count of failed jobs.
      *
-     * @return \Illuminate\Support\Collection
+     * @return int
      */
     public function countFailed();
 
     /**
+     * Get the count of pending jobs.
+     *
+     * @return int
+     */
+    public function countPending();
+
+    /**
+     * Get the count of completed jobs.
+     *
+     * @return int
+     */
+    public function countCompleted();
+
+    /**
+     * Get the count of silenced jobs.
+     *
+     * @return int
+     */
+    public function countSilenced();
+
+    /**
      * Get the count of the recently failed jobs.
      *
-     * @return \Illuminate\Support\Collection
+     * @return int
      */
     public function countRecentlyFailed();
 
@@ -129,9 +174,10 @@ interface JobRepository
      *
      * @param  \Laravel\Horizon\JobPayload  $payload
      * @param  bool  $failed
+     * @param  bool  $silenced
      * @return void
      */
-    public function completed(JobPayload $payload, $failed = false);
+    public function completed(JobPayload $payload, $failed = false, $silenced = false);
 
     /**
      * Delete the given monitored jobs by IDs.

@@ -2,9 +2,7 @@
 
 namespace Laravel\Horizon;
 
-use Illuminate\Queue\WorkerOptions;
-
-class SupervisorOptions extends WorkerOptions
+class SupervisorOptions
 {
     /**
      * The name of the supervisor.
@@ -12,6 +10,13 @@ class SupervisorOptions extends WorkerOptions
      * @var string
      */
     public $name;
+
+    /**
+     * The name of the workers.
+     *
+     * @var string
+     */
+    public $workersName;
 
     /**
      * The queue connection that should be utilized.
@@ -35,6 +40,20 @@ class SupervisorOptions extends WorkerOptions
     public $balance = 'off';
 
     /**
+     * Indicates whether auto-scaling strategy should use "time" (time-to-complete) or "size" (total count of jobs) strategies.
+     *
+     * @var string|null
+     */
+    public $autoScalingStrategy = null;
+
+    /**
+     * Indicates if the supervisor should auto-scale.
+     *
+     * @var bool
+     */
+    public $autoScale;
+
+    /**
      * The maximum number of total processes to start when auto-scaling.
      *
      * @var int
@@ -47,6 +66,13 @@ class SupervisorOptions extends WorkerOptions
      * @var int
      */
     public $minProcesses = 1;
+
+    /**
+     * The parent process identifier.
+     *
+     * @var int
+     */
+    public $parentId = 0;
 
     /**
      * The process priority.
@@ -63,13 +89,93 @@ class SupervisorOptions extends WorkerOptions
     public $directory;
 
     /**
+     * The number of seconds to wait in between auto-scaling attempts.
+     *
+     * @var int
+     */
+    public $balanceCooldown = 3;
+
+    /**
+     * The maximum number of processes to increase or decrease per one scaling.
+     *
+     * @var int
+     */
+    public $balanceMaxShift = 1;
+
+    /**
+     * The number of seconds to wait before retrying a job that encountered an uncaught exception.
+     *
+     * @var int
+     */
+    public $backoff;
+
+    /**
+     * The maximum number of jobs to run.
+     *
+     * @var int
+     */
+    public $maxJobs;
+
+    /**
+     * The maximum number of seconds a worker may live.
+     *
+     * @var int
+     */
+    public $maxTime;
+
+    /**
+     * The maximum amount of RAM the worker may consume.
+     *
+     * @var int
+     */
+    public $memory;
+
+    /**
+     * The maximum number of seconds a child worker may run.
+     *
+     * @var int
+     */
+    public $timeout;
+
+    /**
+     * The number of seconds to wait in between polling the queue.
+     *
+     * @var int
+     */
+    public $sleep;
+
+    /**
+     * The maximum amount of times a job may be attempted.
+     *
+     * @var int
+     */
+    public $maxTries;
+
+    /**
+     * Indicates if the worker should run in maintenance mode.
+     *
+     * @var bool
+     */
+    public $force;
+
+    /**
+     * The number of seconds to rest between jobs.
+     *
+     * @var int
+     */
+    public $rest;
+
+    /**
      * Create a new worker options instance.
      *
      * @param  string  $name
      * @param  string  $connection
      * @param  string  $queue
+     * @param  string  $workersName
      * @param  string  $balance
-     * @param  int  $delay
+     * @param  int  $backoff
+     * @param  int  $maxTime
+     * @param  int  $maxJobs
      * @param  int  $maxProcesses
      * @param  int  $minProcesses
      * @param  int  $memory
@@ -78,20 +184,55 @@ class SupervisorOptions extends WorkerOptions
      * @param  int  $maxTries
      * @param  bool  $force
      * @param  int  $nice
+     * @param  int  $balanceCooldown
+     * @param  int  $balanceMaxShift
+     * @param  int  $parentId
+     * @param  int  $rest
+     * @param  string|null  $autoScalingStrategy
      */
-    public function __construct($name, $connection, $queue = null, $balance = 'off',
-                                $delay = 0, $maxProcesses = 1, $minProcesses = 1, $memory = 128,
-                                $timeout = 60, $sleep = 3, $maxTries = 0, $force = false, $nice = 0)
-    {
+    public function __construct($name,
+                                $connection,
+                                $queue = null,
+                                $workersName = 'default',
+                                $balance = 'off',
+                                $backoff = 0,
+                                $maxTime = 0,
+                                $maxJobs = 0,
+                                $maxProcesses = 1,
+                                $minProcesses = 1,
+                                $memory = 128,
+                                $timeout = 60,
+                                $sleep = 3,
+                                $maxTries = 0,
+                                $force = false,
+                                $nice = 0,
+                                $balanceCooldown = 3,
+                                $balanceMaxShift = 1,
+                                $parentId = 0,
+                                $rest = 0,
+                                $autoScalingStrategy = 'time'
+    ) {
         $this->name = $name;
-        $this->nice = $nice;
-        $this->balance = $balance;
         $this->connection = $connection;
+        $this->queue = $queue ?: config('queue.connections.'.$connection.'.queue');
+        $this->workersName = $workersName;
+        $this->balance = $balance;
+        $this->backoff = $backoff;
+        $this->maxTime = $maxTime;
+        $this->maxJobs = $maxJobs;
         $this->maxProcesses = $maxProcesses;
         $this->minProcesses = $minProcesses;
-        $this->queue = $queue ?: config('queue.connections.'.$connection.'.queue');
-
-        parent::__construct($delay, $memory, $timeout, $sleep, $maxTries, $force);
+        $this->memory = $memory;
+        $this->timeout = $timeout;
+        $this->sleep = $sleep;
+        $this->maxTries = $maxTries;
+        $this->force = $force;
+        $this->nice = $nice;
+        $this->balanceCooldown = $balanceCooldown;
+        $this->balanceMaxShift = $balanceMaxShift;
+        $this->parentId = $parentId;
+        $this->rest = $rest;
+        $this->autoScalingStrategy = $autoScalingStrategy;
     }
 
     /**
@@ -125,6 +266,16 @@ class SupervisorOptions extends WorkerOptions
     public function autoScaling()
     {
         return $this->balance === 'auto';
+    }
+
+    /**
+     * Determine if auto-scaling should be based on the number of jobs on the queue instead of time-to-clear.
+     *
+     * @return bool
+     */
+    public function autoScaleByNumberOfJobs()
+    {
+        return $this->autoScalingStrategy === 'size';
     }
 
     /**
@@ -168,16 +319,24 @@ class SupervisorOptions extends WorkerOptions
             'balance' => $this->balance,
             'connection' => $this->connection,
             'queue' => $this->queue,
-            'delay' => $this->delay,
+            'backoff' => $this->backoff,
             'force' => $this->force,
             'maxProcesses' => $this->maxProcesses,
             'minProcesses' => $this->minProcesses,
             'maxTries' => $this->maxTries,
+            'maxTime' => $this->maxTime,
+            'maxJobs' => $this->maxJobs,
             'memory' => $this->memory,
             'nice' => $this->nice,
             'name' => $this->name,
+            'workersName' => $this->workersName,
             'sleep' => $this->sleep,
             'timeout' => $this->timeout,
+            'balanceCooldown' => $this->balanceCooldown,
+            'balanceMaxShift' => $this->balanceMaxShift,
+            'parentId' => $this->parentId,
+            'rest' => $this->rest,
+            'autoScalingStrategy' => $this->autoScalingStrategy,
         ];
     }
 

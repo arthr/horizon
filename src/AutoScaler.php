@@ -79,7 +79,10 @@ class AutoScaler
         return $pools->mapWithKeys(function ($pool, $queue) use ($supervisor) {
             $size = $this->queue->connection($supervisor->options->connection)->readyNow($queue);
 
-            return [$queue => ($size * $this->metrics->runtimeForQueue($queue))];
+            return [$queue => [
+                'size' => $size,
+                'time' =>  ($size * $this->metrics->runtimeForQueue($queue)),
+            ]];
         });
     }
 
@@ -87,20 +90,29 @@ class AutoScaler
      * Get the number of workers needed per queue for proper balance.
      *
      * @param  \Laravel\Horizon\Supervisor  $supervisor
-     * @param  \Illuminate\Support\Collection  $timeToClear
+     * @param  \Illuminate\Support\Collection  $queues
      * @return \Illuminate\Support\Collection
      */
-    protected function numberOfWorkersPerQueue(Supervisor $supervisor, Collection $timeToClear)
+    protected function numberOfWorkersPerQueue(Supervisor $supervisor, Collection $queues)
     {
-        $timeToClearAll = $timeToClear->sum();
+        $timeToClearAll = $queues->sum('time');
+        $totalJobs = $queues->sum('size');
 
-        return $timeToClear->mapWithKeys(function ($timeToClear, $queue) use ($supervisor, $timeToClearAll) {
+        return $queues->mapWithKeys(function ($timeToClear, $queue) use ($supervisor, $timeToClearAll, $totalJobs) {
             if ($timeToClearAll > 0 &&
                 $supervisor->options->autoScaling()) {
-                return [$queue => (($timeToClear / $timeToClearAll) * $supervisor->options->maxProcesses)];
+                $numberOfProcesses = $supervisor->options->autoScaleByNumberOfJobs()
+                    ? ($timeToClear['size'] / $totalJobs)
+                    : ($timeToClear['time'] / $timeToClearAll);
+
+                return [$queue => $numberOfProcesses *= $supervisor->options->maxProcesses];
             } elseif ($timeToClearAll == 0 &&
                       $supervisor->options->autoScaling()) {
-                return [$queue => $supervisor->options->minProcesses];
+                return [
+                    $queue => $timeToClear['size']
+                                ? $supervisor->options->maxProcesses
+                                : $supervisor->options->minProcesses,
+                ];
             }
 
             return [$queue => $supervisor->options->maxProcesses / count($supervisor->processPools)];
@@ -119,25 +131,36 @@ class AutoScaler
     {
         $supervisor->pruneTerminatingProcesses();
 
-        $poolProcesses = $pool->totalProcessCount();
+        $totalProcessCount = $pool->totalProcessCount();
 
-        if (ceil($workers) > $poolProcesses &&
-            $this->wouldNotExceedMaxProcesses($supervisor)) {
-            $pool->scale($poolProcesses + 1);
-        } elseif (ceil($workers) < $poolProcesses &&
-                  $poolProcesses > $supervisor->options->minProcesses) {
-            $pool->scale($poolProcesses - 1);
+        $desiredProcessCount = ceil($workers);
+
+        if ($desiredProcessCount > $totalProcessCount) {
+            $maxUpShift = min(
+                max(0, $supervisor->options->maxProcesses - $supervisor->totalProcessCount()),
+                $supervisor->options->balanceMaxShift
+            );
+
+            $pool->scale(
+                min(
+                    $totalProcessCount + $maxUpShift,
+                    max($supervisor->options->minProcesses, $supervisor->options->maxProcesses - (($supervisor->processPools->count() - 1) * $supervisor->options->minProcesses)),
+                    $desiredProcessCount
+                )
+            );
+        } elseif ($desiredProcessCount < $totalProcessCount) {
+            $maxDownShift = min(
+                $supervisor->totalProcessCount() - $supervisor->options->minProcesses,
+                $supervisor->options->balanceMaxShift
+            );
+
+            $pool->scale(
+                max(
+                    $totalProcessCount - $maxDownShift,
+                    $supervisor->options->minProcesses,
+                    $desiredProcessCount
+                )
+            );
         }
-    }
-
-    /**
-     * Determine if adding another process would exceed max process limit.
-     *
-     * @param  \Laravel\Horizon\Supervisor  $supervisor
-     * @return bool
-     */
-    protected function wouldNotExceedMaxProcesses(Supervisor $supervisor)
-    {
-        return ($supervisor->totalProcessCount() + 1) <= $supervisor->options->maxProcesses;
     }
 }

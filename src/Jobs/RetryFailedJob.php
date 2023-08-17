@@ -2,9 +2,10 @@
 
 namespace Laravel\Horizon\Jobs;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\Factory as Queue;
+use Illuminate\Support\Str;
 use Laravel\Horizon\Contracts\JobRepository;
-use Laravel\Horizon\JobId;
 
 class RetryFailedJob
 {
@@ -18,7 +19,7 @@ class RetryFailedJob
     /**
      * Create a new job instance.
      *
-     * @param  string  $id;
+     * @param  string  $id
      * @return void
      */
     public function __construct($id)
@@ -40,7 +41,7 @@ class RetryFailedJob
         }
 
         $queue->connection($job->connection)->pushRaw(
-            $this->preparePayload($id = JobId::generate(), $job->payload), $job->queue
+            $this->preparePayload($id = Str::uuid(), $job->payload), $job->queue
         );
 
         $jobs->storeRetryReference($this->id, $id);
@@ -55,10 +56,31 @@ class RetryFailedJob
      */
     protected function preparePayload($id, $payload)
     {
-        return json_encode(array_merge(json_decode($payload, true), [
+        $payload = json_decode($payload, true);
+
+        return json_encode(array_merge($payload, [
             'id' => $id,
+            'uuid' => $id,
             'attempts' => 0,
             'retry_of' => $this->id,
+            'retryUntil' => $this->prepareNewTimeout($payload),
         ]));
+    }
+
+    /**
+     * Prepare the timeout.
+     *
+     * @param  array  $payload
+     * @return int|null
+     */
+    protected function prepareNewTimeout($payload)
+    {
+        $retryUntil = $payload['retryUntil'] ?? $payload['timeoutAt'] ?? null;
+
+        $pushedAt = $payload['pushedAt'] ?? microtime(true);
+
+        return $retryUntil
+                        ? CarbonImmutable::now()->addSeconds(ceil($retryUntil - $pushedAt))->getTimestamp()
+                        : null;
     }
 }

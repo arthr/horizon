@@ -1,6 +1,4 @@
 <script type="text/ecmascript-6">
-    import $ from 'jquery';
-
     export default {
         /**
          * The component's data.
@@ -23,20 +21,26 @@
 
             this.loadTags();
 
+            this.refreshTagsPeriodically();
+
             this.$on('addTagModalClosed', data => {
                 this.addTagModalOpened = false;
             });
         },
 
+        /**
+         * Clean up after the component is destroyed.
+         */
+        destroyed() {
+            clearInterval(this.interval);
+        },
 
         methods: {
             /**
              * Load the monitored tags.
              */
             loadTags() {
-                this.ready = false;
-
-                this.$http.get('/' + Horizon.path + '/api/monitoring')
+                this.$http.get(Horizon.basePath + '/api/monitoring')
                     .then(response => {
                         this.tags = response.data;
 
@@ -44,6 +48,14 @@
                     });
             },
 
+            /**
+             * Refresh the tags every period of time.
+             */
+            refreshTagsPeriodically() {
+                this.interval = setInterval(() => {
+                    this.loadTags();
+                }, 3000);
+            },
 
             /**
              * Open the modal for adding a new tag.
@@ -66,7 +78,7 @@
                     return;
                 }
 
-                this.$http.post('/' + Horizon.path + '/api/monitoring', {'tag': this.newTag})
+                this.$http.post(Horizon.basePath + '/api/monitoring', {'tag': this.newTag})
                     .then(response => {
                         $('#addTagModal').modal('hide');
 
@@ -92,9 +104,9 @@
              * Stop monitoring the given tag.
              */
             stopMonitoring(tag) {
-                this.$http.delete('/' + Horizon.path + '/api/monitoring/' + encodeURIComponent(tag))
+                this.$http.delete(Horizon.basePath + '/api/monitoring/' + encodeURIComponent(tag))
                     .then(() => {
-                        this.tags = _.reject(this.tags, existing => existing.tag == tag)
+                        this.tags = this.tags.filter(existing => existing.tag !== tag)
                     })
             }
         }
@@ -103,9 +115,9 @@
 
 <template>
     <div>
-        <div class="card">
+        <div class="card overflow-hidden">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5>Monitoring</h5>
+                <h2 class="h6 m-0">Monitoring</h2>
 
                 <button @click="openNewTagModal" class="btn btn-primary btn-sm">Monitor Tag</button>
             </div>
@@ -124,11 +136,11 @@
             </div>
 
 
-            <table v-if="ready && tags.length > 0" class="table table-hover table-sm mb-0">
+            <table v-if="ready && tags.length > 0" class="table table-hover mb-0">
                 <thead>
                 <tr>
-                    <th>Tag Name</th>
-                    <th>Jobs</th>
+                    <th>Tag</th>
+                    <th class="text-right">Jobs</th>
                     <th class="text-right"></th>
                 </tr>
                 </thead>
@@ -140,11 +152,11 @@
                             {{ tag.tag }}
                         </router-link>
                     </td>
-                    <td>{{ tag.count }}</td>
+                    <td class="text-right text-muted">{{ tag.count }}</td>
                     <td class="text-right">
                         <a href="#" @click="stopMonitoring(tag.tag)" class="control-action" title="Stop Monitoring">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm1.41-1.41A8 8 0 1 0 15.66 4.34 8 8 0 0 0 4.34 15.66zm9.9-8.49L11.41 10l2.83 2.83-1.41 1.41L10 11.41l-2.83 2.83-1.41-1.41L8.59 10 5.76 7.17l1.41-1.41L10 8.59l2.83-2.83 1.41 1.41z"></path>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
                             </svg>
                         </a>
                     </td>
@@ -159,14 +171,14 @@
                     <div class="modal-header">Monitor New Tag</div>
 
                     <div class="modal-body">
-                        <input type="text" class="form-control" placeholder="App\User:6352"
+                        <input type="text" class="form-control" placeholder="App\Models\User:6352"
                                v-on:keyup.enter="monitorNewTag"
                                v-model="newTag"
                                id="newTagInput">
                     </div>
 
 
-                    <div class="modal-footer justify-content-center">
+                    <div class="modal-footer justify-content-start flex-row-reverse">
                         <button class="btn btn-primary" @click="monitorNewTag">
                             Monitor
                         </button>
