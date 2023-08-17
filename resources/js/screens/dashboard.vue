@@ -22,7 +22,7 @@
          * Prepare the component.
          */
         mounted() {
-            document.title = "Horizon - Dashboard";
+            document.title = "Dashboard";
 
             this.refreshStatsPeriodically();
         },
@@ -42,8 +42,8 @@
              */
             recentJobsPeriod() {
                 return !this.ready
-                    ? 'Jobs Past Hour'
-                    : `Jobs Past ${this.determinePeriod(this.stats.periods.recentJobs)}`;
+                    ? 'Jobs na última hora'
+                    : `Jobs nas últimas ${this.determinePeriod(this.stats.periods.recentJobs)}`;
             },
 
 
@@ -52,8 +52,8 @@
              */
             failedJobsPeriod() {
                 return !this.ready
-                    ? 'Failed Jobs Past 7 Days'
-                    : `Failed Jobs Past ${this.determinePeriod(this.stats.periods.failedJobs)}`;
+                    ? 'Jobs c/ Falha nos últimos 7 Dias'
+                    : `Jobs c/ Falha nos últimos ${this.determinePeriod(this.stats.periods.failedJobs)}`;
             },
         },
 
@@ -158,14 +158,14 @@
     <div>
         <div class="card overflow-hidden">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0">Overview</h2>
+                <h2 class="h6 m-0">Visão Geral</h2>
             </div>
 
             <div class="card-bg-secondary">
                 <div class="d-flex">
                     <div class="w-25">
                         <div class="p-4">
-                            <small class="text-muted font-weight-bold">Jobs Per Minute</small>
+                            <small class="text-muted font-weight-bold">Jobs Por Minuto</small>
 
                             <p class="h4 mt-2 mb-0">
                                 {{ stats.jobsPerMinute ? stats.jobsPerMinute.toLocaleString() : 0 }}
@@ -211,7 +211,7 @@
                                 </svg>
 
                                 <p class="h4 mb-0 ml-2">{{ {running: 'Active', paused: 'Paused', inactive:'Inactive'}[stats.status] }}</p>
-                                <small v-if="stats.status == 'running' && stats.pausedMasters > 0" class="mb-0 ml-2">({{ stats.pausedMasters }} paused)</small>
+                                <small v-if="stats.status == 'running' && stats.pausedMasters > 0" class="mb-0 ml-2">({{ stats.pausedMasters }} pausado)</small>
                             </div>
                         </div>
                     </div>
@@ -220,7 +220,7 @@
                 <div class="d-flex">
                     <div class="w-25">
                         <div class="p-4 mb-0">
-                            <small class="text-muted font-weight-bold">Total Processes</small>
+                            <small class="text-muted font-weight-bold">Processos Totais</small>
 
                             <p class="h4 mt-2">
                                 {{ stats.processes ? stats.processes.toLocaleString() : 0 }}
@@ -230,7 +230,7 @@
 
                     <div class="w-25">
                         <div class="p-4 mb-0">
-                            <small class="text-muted font-weight-bold">Max Wait Time</small>
+                            <small class="text-muted font-weight-bold">Tempo Máximo de Espera</small>
 
                             <p class="mt-2 mb-0">
                                 {{ stats.max_wait_time ? humanTime(stats.max_wait_time) : '-' }}
@@ -242,7 +242,7 @@
 
                     <div class="w-25">
                         <div class="p-4 mb-0">
-                            <small class="text-muted font-weight-bold">Max Runtime</small>
+                            <small class="text-muted font-weight-bold">Tempo Máximo de Execução</small>
 
                             <p class="h4 mt-2">
                                 {{ stats.queueWithMaxRuntime ? stats.queueWithMaxRuntime : '-' }}
@@ -252,7 +252,7 @@
 
                     <div class="w-25">
                         <div class="p-4 mb-0">
-                            <small class="text-muted font-weight-bold">Max Throughput</small>
+                            <small class="text-muted font-weight-bold">Taxa de Transferência Máxima</small>
 
                             <p class="h4 mt-2">
                                 {{ stats.queueWithMaxThroughput ? stats.queueWithMaxThroughput : '-' }}
@@ -266,16 +266,16 @@
 
         <div class="card overflow-hidden mt-4" v-if="workload.length">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0">Current Workload</h2>
+                <h2 class="h6 m-0">Carga de Trabalho Atual</h2>
             </div>
 
             <table class="table table-hover mb-0">
                 <thead>
                 <tr>
-                    <th>Queue</th>
+                    <th>Fila</th>
                     <th class="text-right" style="width: 120px;">Jobs</th>
-                    <th class="text-right" style="width: 120px;">Processes</th>
-                    <th class="text-right" style="width: 180px;">Wait</th>
+                    <th class="text-right" style="width: 120px;">Processos</th>
+                    <th class="text-right" style="width: 180px;">Espera</th>
                 </tr>
                 </thead>
 
@@ -325,9 +325,9 @@
                 <thead>
                 <tr>
                     <th>Supervisor</th>
-                    <th>Queues</th>
-                    <th class="text-right" style="width: 120px;">Processes</th>
-                    <th class="text-right" style="width: 180px;">Balancing</th>
+                    <th>Filas</th>
+                    <th class="text-right" style="width: 120px;">Processos</th>
+                    <th class="text-right" style="width: 180px;">Balanceamento</th>
                 </tr>
                 </thead>
 
@@ -348,7 +348,7 @@
                         {{ supervisor.options.balance.charAt(0).toUpperCase() + supervisor.options.balance.slice(1) }}
                     </td>
                     <td class="text-right text-muted" v-else>
-                        Disabled
+                        Desabilitado
                     </td>
                 </tr>
                 </tbody>

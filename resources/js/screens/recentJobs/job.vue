@@ -15,7 +15,7 @@
                     <path d="M12 10a2 2 0 0 1-3.41 1.41A2 2 0 0 1 10 8V0a9.97 9.97 0 0 1 10 10h-8zm7.9 1.41A10 10 0 1 1 8.59.1v2.03a8 8 0 1 0 9.29 9.29h2.02zm-4.07 0a6 6 0 1 1-7.25-7.25v2.1a3.99 3.99 0 0 0-1.4 6.57 4 4 0 0 0 6.56-1.42h2.1z"></path>
                 </svg>
 
-                <span>Loading...</span>
+                <span>Carregando...</span>
             </div>
 
             <div class="card-body card-bg-secondary collapse show" id="collapseDetails" v-if="ready">
@@ -25,17 +25,17 @@
                 </div>
 
                 <div class="row mb-2">
-                    <div class="col-md-2 text-muted">Queue</div>
+                    <div class="col-md-2 text-muted">Fila</div>
                     <div class="col">{{job.queue}}</div>
                 </div>
 
                 <div class="row mb-2">
-                    <div class="col-md-2 text-muted">Pushed</div>
+                    <div class="col-md-2 text-muted">Entrada</div>
                     <div class="col">{{ readableTimestamp(job.payload.pushedAt) }}</div>
                 </div>
 
                 <div class="row mb-2" v-if="prettyPrintJob(job.payload.data).batchId">
-                    <div class="col-md-2 text-muted">Batch</div>
+                    <div class="col-md-2 text-muted">Lote</div>
                     <div class="col">
                         <router-link :to="{ name: 'batches-preview', params: { batchId: prettyPrintJob(job.payload.data).batchId }}">
                             {{ prettyPrintJob(job.payload.data).batchId }}
@@ -44,12 +44,12 @@
                 </div>
 
                 <div class="row mb-2" v-if="delayed">
-                    <div class="col-md-2 text-muted">Delayed Until</div>
+                    <div class="col-md-2 text-muted">Adiado Até</div>
                     <div class="col">{{delayed}}</div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-2 text-muted">Completed</div>
+                    <div class="col-md-2 text-muted">Concluído</div>
                     <div class="col" v-if="job.completed_at">{{readableTimestamp(job.completed_at)}}</div>
                     <div class="col" v-else>-</div>
                 </div>
@@ -133,7 +133,7 @@
         mounted() {
             this.loadJob(this.$route.params.jobId);
 
-            document.title = "Horizon - Job Detail";
+            document.title = "Job Detalhes";
         },
 
         methods: {

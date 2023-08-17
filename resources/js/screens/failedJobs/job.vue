@@ -24,7 +24,7 @@
         mounted() {
             this.loadFailedJob(this.$route.params.jobId);
 
-            document.title = "Horizon - Failed Jobs";
+            document.title = "Jobs c/ Falha";
 
             this.interval = setInterval(() => {
                 this.reloadRetries();
@@ -108,7 +108,7 @@
     <div>
         <div class="card overflow-hidden">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0" v-if="!ready">Job Preview</h2>
+                <h2 class="h6 m-0" v-if="!ready">Visualização de Job</h2>
                 <h2 class="h6 m-0" v-if="ready">{{job.name}}</h2>
 
                 <button class="btn btn-primary" v-on:click.prevent="retry(job.id)">
@@ -116,7 +116,7 @@
                         <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd" />
                     </svg>
 
-                    Retry
+                    Reprocessar
                 </button>
             </div>
 
@@ -125,7 +125,7 @@
                     <path d="M12 10a2 2 0 0 1-3.41 1.41A2 2 0 0 1 10 8V0a9.97 9.97 0 0 1 10 10h-8zm7.9 1.41A10 10 0 1 1 8.59.1v2.03a8 8 0 1 0 9.29 9.29h2.02zm-4.07 0a6 6 0 1 1-7.25-7.25v2.1a3.99 3.99 0 0 0-1.4 6.57 4 4 0 0 0 6.56-1.42h2.1z"></path>
                 </svg>
 
-                <span>Loading...</span>
+                <span>Carregando...</span>
             </div>
 
             <div class="card-body card-bg-secondary" v-if="ready">
@@ -134,19 +134,19 @@
                     <div class="col">{{job.id}}</div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-md-2 text-muted">Queue</div>
+                    <div class="col-md-2 text-muted">Fila</div>
                     <div class="col">{{job.queue}}</div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-md-2 text-muted">Attempts</div>
+                    <div class="col-md-2 text-muted">Tentativas</div>
                     <div class="col">{{job.payload.attempts}}</div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-md-2 text-muted">Retries</div>
+                    <div class="col-md-2 text-muted">Novas Tentativas</div>
                     <div class="col">{{job.retried_by.length}}</div>
                 </div>
                 <div class="row mb-2" v-if="job.payload.retry_of">
-                    <div class="col-md-2 text-muted">Retry of ID</div>
+                    <div class="col-md-2 text-muted">Tentativa de ID</div>
                     <div class="col">
                          <a :href="Horizon.basePath + '/failed/' + job.payload.retry_of">
                             {{ job.payload.retry_of }}
@@ -158,7 +158,7 @@
                     <div class="col">{{ job.payload.tags && job.payload.tags.length ? job.payload.tags.join(', ') : '' }}</div>
                 </div>
                 <div class="row mb-2" v-if="prettyPrintJob(job.payload.data).batchId">
-                    <div class="col-md-2 text-muted">Batch</div>
+                    <div class="col-md-2 text-muted">Lote</div>
                     <div class="col">
                         <router-link :to="{ name: 'batches-preview', params: { batchId: prettyPrintJob(job.payload.data).batchId }}">
                             {{ prettyPrintJob(job.payload.data).batchId }}
@@ -166,11 +166,11 @@
                     </div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-md-2 text-muted">Pushed</div>
+                    <div class="col-md-2 text-muted">Enfileirado em</div>
                     <div class="col">{{ readableTimestamp(job.payload.pushedAt) }}</div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2 text-muted">Failed</div>
+                    <div class="col-md-2 text-muted">Falhou em</div>
                     <div class="col">{{readableTimestamp(job.failed_at)}}</div>
                 </div>
             </div>
@@ -187,7 +187,7 @@
 
         <div class="card overflow-hidden mt-4" v-if="ready">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0">Exception Context</h2>
+                <h2 class="h6 m-0">Contexto da Exception</h2>
             </div>
 
             <div class="card-body code-bg text-white">
@@ -208,7 +208,7 @@
 
         <div class="card overflow-hidden mt-4" v-if="ready && job.retried_by.length">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0">Recent Retries</h2>
+                <h2 class="h6 m-0">Tentativas Recentes</h2>
             </div>
 
             <table class="table table-hover mb-0">
@@ -216,7 +216,7 @@
                 <tr>
                     <th>Job</th>
                     <th>ID</th>
-                    <th class="text-right">Retry Time</th>
+                    <th class="text-right">Tempo da Tentativa</th>
                 </tr>
                 </thead>
 

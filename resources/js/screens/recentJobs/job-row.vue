@@ -8,13 +8,13 @@
             <small class="ml-1 badge badge-secondary badge-sm"
                     v-tooltip:top="`Delayed for ${delayed}`"
                     v-if="delayed && (job.status == 'reserved' || job.status == 'pending')">
-                Delayed
+                Adiado
             </small>
 
             <br>
 
             <small class="text-muted">
-                Queue: {{job.queue}}
+                Fila: {{job.queue}}
 
                 <span v-if="job.payload.tags && job.payload.tags.length" class="text-break">
                     | Tags: {{ job.payload.tags && job.payload.tags.length ? job.payload.tags.slice(0,3).join(', ') : '' }}<span v-if="job.payload.tags.length > 3"> ({{ job.payload.tags.length - 3 }} more)</span>

@@ -17,7 +17,7 @@
          * Prepare the component.
          */
         mounted() {
-            document.title = "Horizon - Monitoring";
+            document.title = "Monitoramento";
 
             this.loadTags();
 
@@ -117,9 +117,9 @@
     <div>
         <div class="card overflow-hidden">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0">Monitoring</h2>
+                <h2 class="h6 m-0">Monitoramento</h2>
 
-                <button @click="openNewTagModal" class="btn btn-primary btn-sm">Monitor Tag</button>
+                <button @click="openNewTagModal" class="btn btn-primary btn-sm">Monitorar Tag</button>
             </div>
 
             <div v-if="!ready" class="d-flex align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
@@ -127,12 +127,12 @@
                     <path d="M12 10a2 2 0 0 1-3.41 1.41A2 2 0 0 1 10 8V0a9.97 9.97 0 0 1 10 10h-8zm7.9 1.41A10 10 0 1 1 8.59.1v2.03a8 8 0 1 0 9.29 9.29h2.02zm-4.07 0a6 6 0 1 1-7.25-7.25v2.1a3.99 3.99 0 0 0-1.4 6.57 4 4 0 0 0 6.56-1.42h2.1z"></path>
                 </svg>
 
-                <span>Loading...</span>
+                <span>Carregando...</span>
             </div>
 
 
             <div v-if="ready && tags.length == 0" class="d-flex flex-column align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
-                <span>You're not monitoring any tags.</span>
+                <span>Nenhuma Tag em Monitoramento.</span>
             </div>
 
 
@@ -168,7 +168,7 @@
         <div class="modal" id="addTagModel" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">Monitor New Tag</div>
+                    <div class="modal-header">Monitorar Nova Tag</div>
 
                     <div class="modal-body">
                         <input type="text" class="form-control" placeholder="App\Models\User:6352"
@@ -180,11 +180,11 @@
 
                     <div class="modal-footer justify-content-start flex-row-reverse">
                         <button class="btn btn-primary" @click="monitorNewTag">
-                            Monitor
+                            Monitorar
                         </button>
 
                         <button class="btn" @click="cancelNewTag">
-                            Cancel
+                            Cancelar
                         </button>
                     </div>
                 </div>

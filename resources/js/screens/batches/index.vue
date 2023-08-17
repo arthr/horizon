@@ -18,7 +18,7 @@
          * Prepare the component.
          */
         mounted() {
-            document.title = "Horizon - Batches";
+            document.title = "Lotes";
 
             this.loadBatches();
 
@@ -128,7 +128,7 @@
     <div>
         <div class="card overflow-hidden">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h2 class="h6 m-0">Batches</h2>
+                <h2 class="h6 m-0">Lotes</h2>
             </div>
 
             <div v-if="!ready" class="d-flex align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
@@ -136,31 +136,31 @@
                     <path d="M12 10a2 2 0 0 1-3.41 1.41A2 2 0 0 1 10 8V0a9.97 9.97 0 0 1 10 10h-8zm7.9 1.41A10 10 0 1 1 8.59.1v2.03a8 8 0 1 0 9.29 9.29h2.02zm-4.07 0a6 6 0 1 1-7.25-7.25v2.1a3.99 3.99 0 0 0-1.4 6.57 4 4 0 0 0 6.56-1.42h2.1z"></path>
                 </svg>
 
-                <span>Loading...</span>
+                <span>Carregando...</span>
             </div>
 
 
             <div v-if="ready && batches.length == 0" class="d-flex flex-column align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
-                <span>There aren't any batches.</span>
+                <span>Não existem Lotes.</span>
             </div>
 
             <table v-if="ready && batches.length > 0" class="table table-hover mb-0">
                 <thead>
                 <tr>
-                    <th>Batch</th>
+                    <th>Lote</th>
                     <th>Status</th>
-                    <th class="text-right">Size</th>
-                    <th class="text-right">Completion</th>
-                    <th class="text-right">Created</th>
+                    <th class="text-right">Tamanho</th>
+                    <th class="text-right">Conclusão</th>
+                    <th class="text-right">Criado em</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr v-if="hasNewEntries" key="newEntries" class="dontanimate">
                     <td colspan="100" class="text-center card-bg-secondary py-2">
-                        <small><a href="#" v-on:click.prevent="loadNewEntries" v-if="!loadingNewEntries">Load New Entries</a></small>
+                        <small><a href="#" v-on:click.prevent="loadNewEntries" v-if="!loadingNewEntries">Carregar Novas Entradas</a></small>
 
-                        <small v-if="loadingNewEntries">Loading...</small>
+                        <small v-if="loadingNewEntries">Carregando...</small>
                     </td>
                 </tr>
 
@@ -172,16 +172,16 @@
                     </td>
                     <td>
                         <small class="badge badge-danger badge-sm" v-if="!batch.cancelledAt && batch.failedJobs > 0 && batch.totalJobs - batch.pendingJobs < batch.totalJobs">
-                            Failures
+                            Falhas
                         </small>
                         <small class="badge badge-success badge-sm" v-if="!batch.cancelledAt && batch.totalJobs - batch.pendingJobs == batch.totalJobs">
-                            Finished
+                            Finalizados
                         </small>
                         <small class="badge badge-secondary badge-sm" v-if="!batch.cancelledAt && batch.pendingJobs > 0 && !batch.failedJobs">
-                            Pending
+                            Pendentes
                         </small>
                         <small class="badge badge-warning badge-sm" v-if="batch.cancelledAt">
-                            Cancelled
+                            Cancelados
                         </small>
                     </td>
                     <td class="text-right text-muted">{{batch.totalJobs}}</td>
@@ -195,8 +195,8 @@
             </table>
 
             <div v-if="ready && batches.length" class="p-3 d-flex justify-content-between border-top">
-                <button @click="previous" class="btn btn-secondary btn-sm" :disabled="page==1">Previous</button>
-                <button @click="next" class="btn btn-secondary btn-sm" :disabled="batches.length < 50">Next</button>
+                <button @click="previous" class="btn btn-secondary btn-sm" :disabled="page==1">Anterior</button>
+                <button @click="next" class="btn btn-secondary btn-sm" :disabled="batches.length < 50">Próxima</button>
             </div>
         </div>
 
