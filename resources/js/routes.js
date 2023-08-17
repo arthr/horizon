@@ -104,4 +104,10 @@ export default [
         name: 'batches-preview',
         component: require('./screens/batches/preview').default,
     },
+
+    {
+        path: '/nfe',
+        name: 'nfe',
+        component: require('./screens/nfe/index').default,
+    }
 ];
