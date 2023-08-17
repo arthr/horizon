@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ asset('/vendor/horizon/img/favicon.png') }}">
 
-    <title>{{ config('app.name') ? ' - ' . config('app.name') : '' }}</title>
+    <title>{{ config('app.name') ? config('app.name') : '' }}</title>
 
     <!-- Style sheets-->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -32,7 +32,7 @@
                 </svg>
 
                 <h1 class="h4 mb-0 ml-2">
-                    <strong></strong> {{ config('app.name') ? ' - ' . config('app.name') : '' }}
+                    <strong></strong> {{ config('app.name') ? config('app.name') : '' }}
                 </h1>
             </router-link>
 

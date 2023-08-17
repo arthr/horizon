@@ -212,7 +212,7 @@
                         </svg>
                     </div>
 
-                    <input type="text" class="form-control w-100" v-model="tagSearchPhrase" placeholder="Search Tags">
+                    <input type="text" class="form-control w-100" v-model="tagSearchPhrase" placeholder="Procurar Tags">
                 </div>
             </div>
 

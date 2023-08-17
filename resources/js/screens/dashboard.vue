@@ -42,8 +42,8 @@
              */
             recentJobsPeriod() {
                 return !this.ready
-                    ? 'Jobs na última hora'
-                    : `Jobs nas últimas ${this.determinePeriod(this.stats.periods.recentJobs)}`;
+                    ? 'Jobs na Última Hora'
+                    : `Jobs nas Últimas ${this.determinePeriod(this.stats.periods.recentJobs)}`;
             },
 
 
@@ -52,8 +52,8 @@
              */
             failedJobsPeriod() {
                 return !this.ready
-                    ? 'Jobs c/ Falha nos últimos 7 Dias'
-                    : `Jobs c/ Falha nos últimos ${this.determinePeriod(this.stats.periods.failedJobs)}`;
+                    ? 'Jobs c/ Falha nos Últimos 7 Dias'
+                    : `Jobs c/ Falha nos Últimos ${this.determinePeriod(this.stats.periods.failedJobs)}`;
             },
         },
 
@@ -165,7 +165,7 @@
                 <div class="d-flex">
                     <div class="w-25">
                         <div class="p-4">
-                            <small class="text-muted font-weight-bold">Jobs Por Minuto</small>
+                            <small class="text-muted font-weight-bold">Jobs por Minuto</small>
 
                             <p class="h4 mt-2 mb-0">
                                 {{ stats.jobsPerMinute ? stats.jobsPerMinute.toLocaleString() : 0 }}
