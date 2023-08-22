@@ -109,5 +109,12 @@ export default [
         path: '/nfe',
         name: 'nfe',
         component: require('./screens/nfe/index').default,
+    },
+
+    {
+        path: '/login',
+        beforeEnter: () => {
+            window.location.href = window.Horizon.basePath.replace(window.Horizon.path, '') + 'login'
+        }
     }
 ];

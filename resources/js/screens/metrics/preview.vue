@@ -42,9 +42,9 @@
 
                         this.rawData = response.data;
 
-                        this.metric.throughPutChart = this.buildChartData(data, 'throughput', 'Times');
+                        this.metric.throughPutChart = this.buildChartData(data, 'throughput', 'Quantidade');
 
-                        this.metric.runTimeChart = this.buildChartData(data, 'runtime', 'Seconds');
+                        this.metric.runTimeChart = this.buildChartData(data, 'runtime', 'Segundos');
 
                         this.ready = true;
                     });
@@ -57,7 +57,7 @@
             prepareData(data) {
                 return Object.values(this.groupBy(data.map(value => ({
                     ...value,
-                    time: this.formatDate(value.time).format("MMM-D hh:mmA"),
+                    time: this.formatDate(value.time).format("D/MMM hh:mmA"),
                 })), 'time')).map(value => value.reduce((sum, value) => ({
                     runtime: parseFloat(sum.runtime) + parseFloat(value.runtime),
                     throughput: parseInt(sum.throughput) + parseInt(value.throughput),

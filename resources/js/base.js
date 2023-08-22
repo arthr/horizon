@@ -1,6 +1,10 @@
 import moment from 'moment-timezone';
+import 'moment/locale/pt-br';
 
 export default {
+    beforeCreate() {
+        moment.locale('pt-br');
+    },
     computed: {
         Horizon() {
             return Horizon;
@@ -8,6 +12,16 @@ export default {
     },
 
     methods: {
+        /**
+         * Send Logout request.
+         */
+        doLogout() {
+            this.$http.post('/logout')
+                .then(response => {
+                    this.$router.go(Horizon.basePath + '/dashboard');
+                });
+        },
+
         /**
          * Format the given date with respect to timezone.
          */
@@ -50,7 +64,7 @@ export default {
          * Convert to human readable timestamp.
          */
         readableTimestamp(timestamp) {
-            return this.formatDate(timestamp).format('YYYY-MM-DD HH:mm:ss');
+            return this.formatDate(timestamp).format('DD/MM/YYYY HH:mm:ss');
         },
 
         /**
